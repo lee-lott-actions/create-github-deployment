@@ -49,7 +49,7 @@ runs:
           -Environment "${{ inputs.environment }}" `
           -Description "${{ inputs.description }}" `
           -OrgName "${{ inputs.org-name }}" `
-          -RepoName "${{ inputs.repo-name }}"`
+          -RepoName "${{ inputs.repo-name }}" `
           -Token "${{ inputs.token }}"
           
       
