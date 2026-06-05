@@ -57,7 +57,7 @@ function New-Deployment {
 			Write-Host $errorMsg
         }
 	} catch {
-		$errorMsg = "Error: Deployment creation threw an exception and failed. Exception: $($_.Exception.Message)"
+		$errorMsg = "Error: Deployment creation failed. Exception: $($_.Exception.Message)"
 		Add-Content -Path $env:GITHUB_OUTPUT -Value "result=failure"
 		Add-Content -Path $env:GITHUB_OUTPUT -Value "error-message=$errorMsg"
 		Write-Host $errorMsg
