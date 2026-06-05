@@ -35,9 +35,11 @@ function New-Deployment {
 	}
 
 	$body = @{
-		ref         = $Ref
-		environment = $Environment
-		description = $Description
+		ref               = $Ref
+		environment       = $Environment
+		description       = $Description
+	    auto_merge        = $false
+	    required_contexts = @()		
 	} | ConvertTo-Json
 
 	try {
