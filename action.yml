@@ -34,7 +34,7 @@ outputs:
     value: ${{ steps.action.outputs.deployment_id }}
   deployment-url: 
     description: 'The URL of the new deployment'
-    value: ${{ steps.actions.outputs.deployment_url }}
+    value: ${{ steps.action.outputs.deployment_url }}
 
 runs:
   using: composite
