@@ -21,7 +21,7 @@ try {
 
 		$responseJson = $null
 		$statusCode = 200
-    	$successStatusCode = 204 //Set successful Status Code
+    	$successStatusCode = 204
 
 		# HealthCheck endpoint: GET /HealthCheck
 		if ($method -eq "GET" -and $path -eq "/HealthCheck") {
