@@ -1,16 +1,25 @@
-name: GitHub Action Name
-description: A GitHub Action Descriptionto Open a specified GitHub issue using the GitHub API
+name: Create GitHub Deployment
+description: "A GitHub Action to create a new deployment usin gthe GitHub REST API"
 author: Lee Lott
 
 inputs:
-  input-1:
-    description: 'Description of input'
+  ref:
+    description: 'The branch, tag or sha of the new deployment'
     required: true
-  input-2:
-    description: 'Description of input'
+  environment:
+    description: 'The name of the deployment environment (e.g. development, test, statging, production, etc.)'
     required: true
-  input-3:
-    description: 'Description of input'
+  description:
+    description: 'A short description of the deployment'
+    required: true
+  org-name:
+    description: 'The name of the GitHub Organization'
+    required: true
+  repo-name:
+    description: 'The name of the repository'
+    required: true
+  token:
+    description: 'GitHub token with access to create a deployment'
     required: true
 
 outputs:
@@ -20,17 +29,27 @@ outputs:
   error-message:
     description: 'Error message if the action fails'
     value: ${{ steps.action.outputs.error-message }}
+  deployment-id:
+    description: 'The id of the new deployment'
+    value: ${{ steps.action.outputs.deployment_id }}
+  deployment-url: 
+    description: 'The URL of the new deployment'
+    value: ${{ steps.action.outputs.deployment_url }}
 
 runs:
   using: composite
   steps:
-    - name: Action Name
+    - name: Create Deployment
       id: action
       shell: pwsh
       run: |        
         . "${{ github.action_path }}/action.ps1"
-        run_action `
-          -Input1 "${{ inputs.input-1 }}" `
-          -Input2 "${{ inputs.input-2 }}" `
-          -Input3 "${{ inputs.input-3 }}" `
+        New-Deployment `
+          -Ref "${{ inputs.ref }}" `
+          -Environment "${{ inputs.environment }}" `
+          -Description "${{ inputs.description }}" `
+          -OrgName "${{ inputs.org-name }}" `
+          -RepoName "${{ inputs.repo-name }}" `
+          -Token "${{ inputs.token }}"
+          
       

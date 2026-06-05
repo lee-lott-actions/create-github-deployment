@@ -1,61 +1,65 @@
-# GitHub Action
+# Create GitHub Deployment GitHub Action
 
-Description of what the GitHub Action does.
+This GitHub Action creates a GitHub deployment using the GitHub REST API.  
 
 ## Features
-- Feature #1
-- Feature #2
-- Feature #3
+- Creates a deployment for the given reference and environment.
+- Uses the GitHub REST API (no dependencies on the CLI or local git).
+- Fully supports GitHub Organizations and user-owned repositories.
+- Outputs the deployment id and url for use in subsequent workflow steps.
 
 ## Inputs
 | Name          | Description                                           | Required | Default |
 |---------------|-------------------------------------------------------|----------|---------|
-| `input-1`     | Description of input-1.                               | Yes      | N/A     |
-| `input-2`     | Description of input-2.                               | Yes      | N/A     |
-| `input-3`     | Description of input-3.                               | Yes      | N/A    |
+| `ref`         | The branch, tag or sha of the new deployment          | Yes      | N/A     |
+| `environment` | The name of the deployment environment (e.g. development, test, statging, production, etc.) | Yes      | N/A     |
+| `description` | A short description of the deployment                 | Yes      | N/A    |
+| `org-name`    | The name of the GitHub Organization                   | Yes      | N/A    |
+| `repo-name`   | The name of the repository                            | Yes      | N/A    |
+| `token`       | GitHub token with access to create a deployment       | Yes      | N/A    |
 
 ## Outputs
 | Name           | Description                                                   |
 |----------------|---------------------------------------------------------------|
-| `result`       | Result of the action ("success" or "failure").                |
-| `error-message`| Error message if the action fails.                            |
+| `result`        | Result of the action ("success" or "failure")                |
+| `error-message` | Error message if the action fails                            |
+| `deployment-id` | The id of the new deployment                                 |
+| `deployment-url`| The URL of the new deployment                                |
 
 ## Usage
 1. **Add the Action to Your Workflow**:
-   Create or update a workflow file (e.g., `.github/workflows/your-action.yml`) in your repository.
+   Create or update a workflow file (e.g., `.github/workflows/create-deployment.yml`) in your repository.
+   **Ensure you pass all required inputs and use a valid token with PR write access.**
 
-2. **Reference the Action**:
+3. **Reference the Action**:
    Use the action by referencing the repository and version (e.g., `v1`).
 
-3. **Example Workflow**:
+4. **Example Workflow**:
    ```yaml
-   name: Your Action
+   name: Create New GitHub Deployment
    on:
-     issues:
-       types: [labeled]
+     workflow_dispatch:
+   
    jobs:
-     open-issue:
+     new-deployment:
        runs-on: ubuntu-latest
        steps:
          - name: Run Action
-           id: open
-           uses: lee-lott-actions/your-action@v1
+           id: new-deployment
+           uses: lee-lott-actions/create-deployment@v1
            with:
-             input-1: '1'
-             input-2: '2'
-             input-3: '3'
+             ref: 'v1.2.3'
+             environment: 'production'
+             description: 'This is a deployment to production.'
+             org-name: ${{ github.repository_owner }}
+             repo-name: ${{ github.event.repository.name }}
+             token: ${{ secrets.GITHUB_TOKEN }}
          - name: Print Result
            run: |
-             if [[ "${{ steps.open.outputs.result }}" == "success" ]]; then
-               echo "Issue #${{ github.event.issue.number }} successfully opened."
+             if [[ "${{ steps.new-deployment.outputs.result }}" == "success" ]]; then
+               echo "New deployment successfully created."
              else
-               echo "Error: ${{ steps.open.outputs.error-message }}"
+               echo "Error: ${{ steps.new-deployment.outputs.error-message }}"
                exit 1
              fi
-## To Do After Cloning
-- Update the Readme.  Please include the title, description, a brief list of features at a minimum, Inputs, Outputs and Uasage.
-- Add the correct inputs and outputs to the `action.yml` file and call your function found in the `action.ps1`.
-- Update the `action.ps1` with your PowerShell code.
-- Update the `integration-tests` step in `./.github/workflows/build-check.yml` to provide the correct inputs to your action.
-- Configure the `./tests/Start-MockServer.ps1` to include any additonal API calls that are needed.
-- Configure the `./tests/action.Tests.ps1` to include any unit tests
+   ```
