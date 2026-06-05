@@ -43,7 +43,7 @@ runs:
       id: action
       shell: pwsh
       run: |        
-        . "${{ github.action_path }}/action.ps1
+        . "${{ github.action_path }}/action.ps1"
         New-Deployment `
           -Ref "${{ inputs.ref }}" `
           -Environment "${{ inputs.environment }}" `
