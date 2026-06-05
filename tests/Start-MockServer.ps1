@@ -21,16 +21,22 @@ try {
 
 		$responseJson = $null
 		$statusCode = 200
-    	$successStatusCode = 204 //Set successful Status Code
+    	$successStatusCode = 204
 
 		# HealthCheck endpoint: GET /HealthCheck
 		if ($method -eq "GET" -and $path -eq "/HealthCheck") {
 			$statusCode = 200
 			$responseJson = @{ status = "ok" } | ConvertTo-Json
-		}
-    	//Add additional checks here
-		elseif () {
-			
+		}    	
+		elseif ($method -eq "POST" -and $path -match '^/repos/([^/]+)/([^/]+)/deployments$') {
+			$owner = $Matches[1]
+            $repo = $Matches[2]
+
+			$statusCode = 201
+			$responseJson = @{
+               id = '123'
+			   url = 'http://127.0.0.1/deployments/v1.2.3'
+            } | ConvertTo-Json -Compress -Depth 10
 		}
 		else {
 			$statusCode = 404
