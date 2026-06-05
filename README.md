@@ -1,70 +1,65 @@
 # Create GitHub Deployment GitHub Action
 
-This GitHub Action creates a new GitHub Deployment using the GitHub REST API and PowerShell.  
-It is designed to be simple, composable, and independent of the local git state.
+This GitHub Action creates a GitHub deployment using the GitHub REST API.  
 
 ## Features
-
-- Creates a new GitHub Deployment in your repository using the REST API.
-- Lets you specify the target ref, deployment environment, and description.
+- Creates a deployment for the given reference and environment.
+- Uses the GitHub REST API (no dependencies on the CLI or local git).
 - Fully supports GitHub Organizations and user-owned repositories.
-- Outputs the deployment creation result, deployment ID, deployment URL, and error message for use in subsequent workflow steps.
-- Designed for secure automation with the minimal required token permissions.
+- Outputs the deployment id and url for use in subsequent workflow steps.
 
 ## Inputs
-
-| Name | Description | Required | Default |
-|------|-------------|----------|---------|
-| `ref` | The branch, tag or sha of the new deployment | Yes | |
-| `environment` | The name of the deployment environment (e.g. development, test, statging, production, etc.) | Yes | |
-| `description` | A short description of the deployment | Yes | |
-| `org-name` | The name of the GitHub Organization | Yes | |
-| `repo-name` | The name of the repository | Yes | |
-| `token` | GitHub token with access to create a deployment | Yes | |
+| Name          | Description                                           | Required | Default |
+|---------------|-------------------------------------------------------|----------|---------|
+| `ref`         | The branch, tag or sha of the new deployment          | Yes      | N/A     |
+| `environment` | The name of the deployment environment (e.g. development, test, statging, production, etc.) | Yes      | N/A     |
+| `description` | A short description of the deployment                 | Yes      | N/A    |
+| `org-name`    | The name of the GitHub Organization                   | Yes      | N/A    |
+| `repo-name`   | The name of the repository                            | Yes      | N/A    |
+| `token`       | GitHub token with access to create a deployment       | Yes      | N/A    |
 
 ## Outputs
-
-| Name | Description |
-|------|-------------|
-| `result` | Result of the action (`success` or `failure`) |
-| `error-message` | Error message if the action fails |
-| `deployment-id` | The id of the new deployment |
-| `deployment-url` | The URL of the new deployment |
+| Name           | Description                                                   |
+|----------------|---------------------------------------------------------------|
+| `result`        | Result of the action ("success" or "failure")                |
+| `error-message` | Error message if the action fails                            |
+| `deployment-id` | The id of the new deployment                                 |
+| `deployment-url`| The URL of the new deployment                                |
 
 ## Usage
+1. **Add the Action to Your Workflow**:
+   Create or update a workflow file (e.g., `.github/workflows/create-deployment.yml`) in your repository.
+   **Ensure you pass all required inputs and use a valid token with PR write access.**
 
-Create a workflow file in your repository (for example, `.github/workflows/create-deployment.yml`).  
-**Ensure you pass all required inputs and use a valid token with deployment write access.**
+3. **Reference the Action**:
+   Use the action by referencing the repository and version (e.g., `v1`).
 
-### Example Workflow
-
-```yaml
-name: Create GitHub Deployment
-on:
-  workflow_dispatch:
-
-jobs:
-  create-deployment:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Create GitHub Deployment via API
-        id: create-deployment
-        uses: lee-lott-actions/create-github-deployment@v1
-        with:
-          ref: 'main'
-          environment: 'production'
-          description: 'Deploy main to production'
-          repo-name: ${{ github.event.repository.name }}
-          org-name: ${{ github.repository_owner }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Output Deployment Result
-        run: |
-          echo "Deployment Result: ${{ steps.create-deployment.outputs.result }}"
-          echo "Deployment ID: ${{ steps.create-deployment.outputs.deployment-id }}"
-          echo "Deployment URL: ${{ steps.create-deployment.outputs.deployment-url }}"
-          echo "Error Message: ${{ steps.create-deployment.outputs.error-message }}"
-```
+4. **Example Workflow**:
+   ```yaml
+   name: Create New GitHub Deployment
+   on:
+     workflow_dispatch:
+   
+   jobs:
+     new-deployment:
+       runs-on: ubuntu-latest
+       steps:
+         - name: Run Action
+           id: new-deployment
+           uses: lee-lott-actions/create-deployment@v1
+           with:
+             ref: 'v1.2.3'
+             environment: 'production'
+             description: 'This is a deployment to production.'
+             org-name: ${{ github.repository_owner }}
+             repo-name: ${{ github.event.repository.name }}
+             token: ${{ secrets.GITHUB_TOKEN }}
+         - name: Print Result
+           run: |
+             if [[ "${{ steps.new-deployment.outputs.result }}" == "success" ]]; then
+               echo "New deployment successfully created."
+             else
+               echo "Error: ${{ steps.new-deployment.outputs.error-message }}"
+               exit 1
+             fi
+   ```
