@@ -1,61 +1,70 @@
-# GitHub Action
+# Create GitHub Deployment GitHub Action
 
-Description of what the GitHub Action does.
+This GitHub Action creates a new GitHub Deployment using the GitHub REST API and PowerShell.  
+It is designed to be simple, composable, and independent of the local git state.
 
 ## Features
-- Feature #1
-- Feature #2
-- Feature #3
+
+- Creates a new GitHub Deployment in your repository using the REST API.
+- Lets you specify the target ref, deployment environment, and description.
+- Fully supports GitHub Organizations and user-owned repositories.
+- Outputs the deployment creation result, deployment ID, deployment URL, and error message for use in subsequent workflow steps.
+- Designed for secure automation with the minimal required token permissions.
 
 ## Inputs
-| Name          | Description                                           | Required | Default |
-|---------------|-------------------------------------------------------|----------|---------|
-| `input-1`     | Description of input-1.                               | Yes      | N/A     |
-| `input-2`     | Description of input-2.                               | Yes      | N/A     |
-| `input-3`     | Description of input-3.                               | Yes      | N/A    |
+
+| Name | Description | Required | Default |
+|------|-------------|----------|---------|
+| `ref` | The branch, tag or sha of the new deployment | Yes | |
+| `environment` | The name of the deployment environment (e.g. development, test, statging, production, etc.) | Yes | |
+| `description` | A short description of the deployment | Yes | |
+| `org-name` | The name of the GitHub Organization | Yes | |
+| `repo-name` | The name of the repository | Yes | |
+| `token` | GitHub token with access to create a deployment | Yes | |
 
 ## Outputs
-| Name           | Description                                                   |
-|----------------|---------------------------------------------------------------|
-| `result`       | Result of the action ("success" or "failure").                |
-| `error-message`| Error message if the action fails.                            |
+
+| Name | Description |
+|------|-------------|
+| `result` | Result of the action (`success` or `failure`) |
+| `error-message` | Error message if the action fails |
+| `deployment-id` | The id of the new deployment |
+| `deployment-url` | The URL of the new deployment |
 
 ## Usage
-1. **Add the Action to Your Workflow**:
-   Create or update a workflow file (e.g., `.github/workflows/your-action.yml`) in your repository.
 
-2. **Reference the Action**:
-   Use the action by referencing the repository and version (e.g., `v1`).
+Create a workflow file in your repository (for example, `.github/workflows/create-deployment.yml`).  
+**Ensure you pass all required inputs and use a valid token with deployment write access.**
 
-3. **Example Workflow**:
-   ```yaml
-   name: Your Action
-   on:
-     issues:
-       types: [labeled]
-   jobs:
-     open-issue:
-       runs-on: ubuntu-latest
-       steps:
-         - name: Run Action
-           id: open
-           uses: lee-lott-actions/your-action@v1
-           with:
-             input-1: '1'
-             input-2: '2'
-             input-3: '3'
-         - name: Print Result
-           run: |
-             if [[ "${{ steps.open.outputs.result }}" == "success" ]]; then
-               echo "Issue #${{ github.event.issue.number }} successfully opened."
-             else
-               echo "Error: ${{ steps.open.outputs.error-message }}"
-               exit 1
-             fi
-## To Do After Cloning
-- Update the Readme.  Please include the title, description, a brief list of features at a minimum, Inputs, Outputs and Uasage.
-- Add the correct inputs and outputs to the `action.yml` file and call your function found in the `action.ps1`.
-- Update the `action.ps1` with your PowerShell code.
-- Update the `integration-tests` step in `./.github/workflows/build-check.yml` to provide the correct inputs to your action.
-- Configure the `./tests/Start-MockServer.ps1` to include any additonal API calls that are needed.
-- Configure the `./tests/action.Tests.ps1` to include any unit tests
+### Example Workflow
+
+```yaml
+name: Create GitHub Deployment
+on:
+  workflow_dispatch:
+
+jobs:
+  create-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Create GitHub Deployment via API
+        id: create-deployment
+        uses: lee-lott-actions/create-github-deployment@v1
+        with:
+          ref: 'main'
+          environment: 'production'
+          description: 'Deploy main to production'
+          repo-name: ${{ github.event.repository.name }}
+          org-name: ${{ github.repository_owner }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Output Deployment Result
+        run: |
+          echo "Deployment Result: ${{ steps.create-deployment.outputs.result }}"
+          echo "Deployment ID: ${{ steps.create-deployment.outputs.deployment-id }}"
+          echo "Deployment URL: ${{ steps.create-deployment.outputs.deployment-url }}"
+          echo "Error Message: ${{ steps.create-deployment.outputs.error-message }}"
+```
